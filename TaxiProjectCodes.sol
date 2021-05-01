@@ -43,7 +43,7 @@ contract SharedTaxi {
     address payable public carDealer;
     uint public contractBalance;
     uint constant expenses = 10 ether;
-    uint constant participationFee = 10 ether;      // TODO: Change this to 100.
+    uint constant participationFee = 100 ether;      // TODO: Change this to 100(DEBUG: 10 ether).
     uint public ownedCar;
     
     Driver public proposedDriver;
@@ -315,7 +315,7 @@ contract SharedTaxi {
     onlyManager()
     {
         require(
-            lastDriverSalaryDate + 1 minutes <= block.timestamp,    // TODO: change this to 1 month.
+            lastDriverSalaryDate + 1 months <= block.timestamp,    // TODO: change this to 1 month(DEBUG: 1 minute).
             "You have already paid the driver this month!"
         );
         
@@ -353,7 +353,7 @@ contract SharedTaxi {
     onlyManager()
     {
         require(
-            lastCarExpensesDate + 1 minutes <= block.timestamp, // TODO: change this to 6 months.
+            lastCarExpensesDate + 6 months <= block.timestamp, // TODO: change this to 6 months.
             "You have already paid the expenses in the last 6 months!"
         );
         
@@ -372,13 +372,13 @@ contract SharedTaxi {
     onlyManager()
     {
         require(
-            lastPayDividendDate + 1 minutes <= block.timestamp, // TODO: change this to 6 months.
+            lastPayDividendDate + 6 months <= block.timestamp, // TODO: change this to 6 months(DEBUG: 1 minute).
             "You have already paid the profits in the last 6 months!"
         );
         
         require(
-            lastCarExpensesDate + 1 minutes > block.timestamp &&    // TODO: change this to 6 months.
-            lastDriverSalaryDate + 1 minutes > block.timestamp,     // TODO: change this to 1 month.
+            lastCarExpensesDate + 6 months > block.timestamp &&    // TODO: change this to 6 months(DEBUG: 1 minute).
+            lastDriverSalaryDate + 1 months > block.timestamp,     // TODO: change this to 1 month(DEBUG: 1 minute).
             "Make sure you have paid the necessary expenses and driver salary before paying participants!"
         );
         

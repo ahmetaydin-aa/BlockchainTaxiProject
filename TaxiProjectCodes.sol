@@ -105,6 +105,7 @@ contract SharedTaxi {
         contractBalance = 0;
         lastCarExpensesDate = 0;
         lastPayDividendDate = 0;
+        lastDriverSalaryDate = 0;
     }
     
     
@@ -340,6 +341,11 @@ contract SharedTaxi {
         );
         
         payable(msg.sender).transfer(salaryDriver.balance);
+        
+        if (msg.sender == driver.dAddress)
+            driver.balance = 0;
+        else
+            oldDriver.balance = 0;
     }
     
     
@@ -399,6 +405,7 @@ contract SharedTaxi {
         );
         
         payable(msg.sender).transfer(p.balance);
+        participants[msg.sender].balance = 0;
     }
     
     

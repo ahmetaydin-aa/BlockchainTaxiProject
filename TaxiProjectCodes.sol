@@ -54,7 +54,9 @@ contract SharedTaxi {
     uint public lastDriverSalaryDate;
     uint public lastPayDividendDate;
     
-    
+    /**
+     *   Modifier used for manager authentication.
+     */
     modifier onlyManager {
         require(
             msg.sender == manager,
@@ -63,6 +65,9 @@ contract SharedTaxi {
         _;
     }
     
+    /**
+     *   Modifier used for car dealer authentication.
+     */
     modifier onlyCarDealer {
         require(
             msg.sender == carDealer,
@@ -71,6 +76,9 @@ contract SharedTaxi {
         _;
     }
     
+    /**
+     *  Modifier used for driver/old driver authentication.
+     */
     modifier onlyDriver {
         require(
             msg.sender == driver.dAddress || msg.sender == oldDriver.dAddress,
@@ -79,6 +87,9 @@ contract SharedTaxi {
         _;
     }
     
+    /**
+     *  Modifier used for participant authentication.
+     */
     modifier onlyParticipant {
         bool isParticipant = false;
         
@@ -97,9 +108,6 @@ contract SharedTaxi {
     }
     
     
-    /**
-     * @dev Set contract deployer as manager
-     */
     constructor() {
         manager = msg.sender;
         contractBalance = 0;
@@ -108,7 +116,13 @@ contract SharedTaxi {
         lastDriverSalaryDate = 0;
     }
     
-    
+    /**
+     *  Function for participants to join.
+     *  The function first controls the participant limit which is 9.
+     *  If there is a room for a new participant, function then checks for participation fee.
+     *  Lastly, it checks for whether the participant is already in the contract or not.
+     *  After the checks, participant will be added to contract. Participation fee transferred to contract balance.
+     */
     function join() public payable {
         require (
             participantAddresses.length < 10, 
@@ -141,14 +155,19 @@ contract SharedTaxi {
         contractBalance += msg.value;
     }
     
-    
+    /**
+     *  Function for setting car dealer.
+     */
     function setCarDealer(address payable carDealerAddress) public
     onlyManager()
     {
         carDealer = carDealerAddress;
     }
     
-    
+    /**
+     *  Function for proposal of a new car to contract by car dealer.
+     *  The function resets the approval flag of each participant to false at the end.
+     */
     function carProposeToBusiness(uint carID, uint price, uint offerValidTime) public 
     onlyCarDealer()
     {
@@ -159,7 +178,9 @@ contract SharedTaxi {
         }
     }
     
-    
+    /**
+     *  Function for participants to approve the proposed new car.
+     */
     function approvePurchaseCar() public 
     onlyParticipant()
     {
@@ -174,7 +195,12 @@ contract SharedTaxi {
         participants[msg.sender].approvedPurchaseCar = true;
     }
     
-    
+    /**
+     *  Function for buying the car with contract balance.
+     *  The function first controls the proposal timeout limit.
+     *  Then, checks for contract balance to be able to pay this car.
+     *  Lastly, it checks approval count of the car.
+     */
     function purchaseCar() public
     onlyManager()
     {
@@ -198,7 +224,11 @@ contract SharedTaxi {
         ownedCar = proposedCar.carID;
     }
     
-    
+    /**
+     *  Function for proposal of selling the contract car by car dealer.
+     *  Function checks for id of the purposed car is actually the car of the contract.
+     *  The function resets the approval flag of each participant to false at the end.
+     */
     function repurchaseCarPropose(uint carID, uint price, uint offerValidTime) public 
     onlyCarDealer()
     {
@@ -214,7 +244,9 @@ contract SharedTaxi {
         }
     }
     
-    
+    /**
+     *  Function for participants to approve the proposed car.
+     */
     function approveSellProposal() public 
     onlyParticipant()
     {
@@ -229,7 +261,13 @@ contract SharedTaxi {
         participants[msg.sender].approvedSellProposal = true;
     }
     
-    
+    /**
+     *  Function for selling the car.
+     *  The function first controls the proposal timeout limit.
+     *  Then, checks for sent payment amount with the proposed amount.
+     *  Lastly, it checks approval count of the proposal.
+     *  At the end, required amount will be added to the contract balance.
+     */
     function repurchaseCar() public payable
     onlyCarDealer()
     {
@@ -252,7 +290,10 @@ contract SharedTaxi {
         ownedCar = 0;
     }
     
-    
+    /**
+     *  Function for proposal of a new driver to contract by manager.
+     *  The function resets the approval flag of each participant to false at the end.
+     */
     function proposeDriver(address dAddress, uint salary) public 
     onlyManager()
     {
@@ -263,7 +304,9 @@ contract SharedTaxi {
         }
     }
     
-    
+    /**
+     *  Function for participants to approve the proposed driver.
+     */
     function approveDriver() public 
     onlyParticipant()
     {
@@ -278,7 +321,9 @@ contract SharedTaxi {
         participants[msg.sender].approvedDriver = true;
     }
     
-    
+    /**
+     *  Function for setting the contract driver by manager, if the approval count is valid.
+     */
     function setDriver() public 
     onlyManager()
     {
@@ -290,7 +335,9 @@ contract SharedTaxi {
         driver = proposedDriver;
     }
     
-    
+    /**
+     *  Function for firing the current driver.
+     */
     function fireDriver() public 
     onlyManager()
     {
@@ -305,12 +352,16 @@ contract SharedTaxi {
         delete driver;
     }
     
-    
+    /**
+     *  Function for charging customers.
+     */
     function getCharge() public payable {
         contractBalance += msg.value;
     }
     
-    
+    /**
+     *  Function for paying salary of the driver from contract balance to driver account.
+     */
     function releaseSalary() public 
     onlyManager()
     {
@@ -329,7 +380,9 @@ contract SharedTaxi {
         lastDriverSalaryDate = block.timestamp;
     }
     
-    
+    /**
+     *  Function for driver to withdraw the current balance in his/her account.
+     */
     function getSalary() public 
     onlyDriver()
     {
@@ -348,7 +401,10 @@ contract SharedTaxi {
             oldDriver.balance = 0;
     }
     
-    
+    /**
+     *  Function for paying the expenses of the car to the car dealer. This function transfers the
+     *  required amount from the contract balance to car dealer's wallet.
+     */
     function carExpenses() public 
     onlyManager()
     {
@@ -367,7 +423,9 @@ contract SharedTaxi {
         lastCarExpensesDate = block.timestamp;
     }
     
-    
+    /**
+     *  Function for paying participants. This function only changes the balances of each participant not transferring the amount to their wallets.
+     */
     function payDividend() public 
     onlyManager()
     {
@@ -393,7 +451,9 @@ contract SharedTaxi {
         lastPayDividendDate = block.timestamp;
     }
     
-    
+    /**
+     *  Function for participants to withdraw the current balance in his/her account.
+     */
     function getDivided() public 
     onlyParticipant()
     {
